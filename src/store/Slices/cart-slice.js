@@ -1,4 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
+import { uiActions } from './ui-slice';
 
 const cartSlice = createSlice({
   name: 'cart-slice',
@@ -7,6 +8,10 @@ const cartSlice = createSlice({
     totalQuantity: 0,
   },
   reducers: {
+    initCart(state, action) {
+      state.items = action.payload.items || [];
+      state.totalQuantity = action.payload.totalQuantity;
+    },
     addToCart(state, action) {
       const { payload: item } = action;
       const existingItem = state.items.find(i => i.id === item.id);
@@ -49,6 +54,66 @@ const cartSlice = createSlice({
     },
   },
 });
+
+export function getCartData() {
+  return async dispatch => {
+    let resData;
+
+    try {
+      const res = await fetch('firebase Link');
+      if (!res.ok) {
+        throw new Error('sending cart data failed!');
+      }
+      resData = await res.json();
+    } catch (err) {
+      dispatch(
+        uiActions.showNotification({
+          status: 'error',
+          title: 'Error!',
+          message: 'Sending cart data failed!',
+        })
+      );
+    }
+
+    return resData;
+  };
+}
+
+export function sendCartData(cartData) {
+  return async dispatch => {
+    dispatch(
+      uiActions.showNotification({
+        status: 'pending',
+        title: 'Sending...',
+        message: 'Sending cart data!',
+      })
+    );
+    try {
+      const res = await fetch('firebase Link', {
+        method: 'PUT',
+        body: JSON.stringify(cartData),
+      });
+      if (!res.ok) {
+        throw new Error('sending cart data failed!');
+      }
+    } catch (err) {
+      dispatch(
+        uiActions.showNotification({
+          status: 'error',
+          title: 'Error!',
+          message: 'Sending cart data failed!',
+        })
+      );
+    }
+    dispatch(
+      uiActions.showNotification({
+        status: 'success',
+        title: 'Success!',
+        message: 'Sent cart data successfully!',
+      })
+    );
+  };
+}
 
 export const cartActions = cartSlice.actions;
 export default cartSlice;

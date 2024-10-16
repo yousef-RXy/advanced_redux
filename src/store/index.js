@@ -13,3 +13,5 @@ const store = configureStore({
 export default store;
 export { uiActions } from './Slices/ui-slice';
 export { cartActions } from './Slices/cart-slice';
+export { sendCartData } from './Slices/cart-slice';
+export { getCartData } from './Slices/cart-slice';
